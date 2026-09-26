@@ -115,3 +115,14 @@ class MovieIn(BaseModel):
         if self.data_lancamento and self.data_lancamento.year != self.ano_lancamento:
             raise ValueError("data_lancamento deve estar no ano_lancamento informado")
         return self
+
+
+
+class ReviewIn(BaseModel):
+    """Dados de uma nova avaliação."""
+
+    nome: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
+    nota: float = Field(ge=0, le=10)
+    comentario: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)
+    ]
