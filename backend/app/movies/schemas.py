@@ -117,7 +117,6 @@ class MovieIn(BaseModel):
         return self
 
 
-
 class ReviewIn(BaseModel):
     """Dados de uma nova avaliação."""
 
