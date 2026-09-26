@@ -15,9 +15,7 @@ export function formatDate(value: string) {
 }
 
 export function formatDuration(minutes: number) {
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
-  return hours > 0 ? `${hours}h ${rest}min` : `${rest}min`
+  return `${minutes} min`
 }
 
 const usd = new Intl.NumberFormat('pt-BR', {
