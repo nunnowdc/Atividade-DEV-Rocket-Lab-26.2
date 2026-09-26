@@ -18,13 +18,7 @@
   color: var(--color-text-muted);
   opacity: 0.5;
   cursor: pointer;
-  transition:
-    color 0.1s,
-    transform 0.1s;
-}
-
-.star:hover {
-  transform: scale(1.15);
+  transition: color 0.1s;
 }
 
 .star:focus-visible {
