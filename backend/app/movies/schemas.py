@@ -1,10 +1,9 @@
-# O formato do JSON que a API devolve
-
 """Schemas Pydantic: definem o formato do JSON que a API recebe e devolve."""
 
 from datetime import date, datetime
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, model_validator
 
 
 class ORMModel(BaseModel):
@@ -86,3 +85,33 @@ class MoviePage(BaseModel):
     page: int
     size: int
     pages: int
+
+
+# --- Entrada: o que o formulário de cadastro/edição envia ---
+
+StatusFilme = Literal["Lançado", "Pós-Produção", "Em Produção", "Planejado"]
+Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+
+
+class MovieIn(BaseModel):
+    """Dados para cadastrar ou atualizar um filme."""
+
+    titulo: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+    sinopse: str | None = Field(default=None, max_length=4000)
+    ano_lancamento: int = Field(ge=1888, le=2100)
+    data_lancamento: date | None = None
+    duracao_minutos: int | None = Field(default=None, ge=1)
+    status_filme: StatusFilme = "Lançado"
+    url_poster: HttpUrl | None = None
+    url_backdrop: HttpUrl | None = None
+    genre_ids: list[str] = Field(min_length=1)
+    diretores: list[Name] = Field(min_length=1)
+    atores: list[Name] = []
+    roteiristas: list[Name] = []
+    produtoras: list[Name] = []
+
+    @model_validator(mode="after")
+    def check_release_year(self) -> "MovieIn":
+        if self.data_lancamento and self.data_lancamento.year != self.ano_lancamento:
+            raise ValueError("data_lancamento deve estar no ano_lancamento informado")
+        return self
