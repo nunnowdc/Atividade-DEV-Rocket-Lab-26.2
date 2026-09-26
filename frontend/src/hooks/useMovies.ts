@@ -1,14 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
-import { ApiError } from '../services/api'
-import { getMovie } from '../services/movies'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { listMovies, type ListMoviesParams } from '../services/movies'
 
-// Busca os detalhes completos de um filme.
-export function useMovie(movieId: string) {
+// Busca uma página do catálogo. O TanStack Query guarda cada combinação de
+// página + busca em cache, identificada pela queryKey.
+export function useMovies(params: ListMoviesParams) {
   return useQuery({
-    queryKey: ['movie', movieId],
-    queryFn: () => getMovie(movieId),
-    // Não adianta tentar de novo se o filme não existe (404).
-    retry: (failureCount, error) =>
-      !(error instanceof ApiError && error.status === 404) && failureCount < 1,
+    queryKey: ['movies', params],
+    queryFn: () => listMovies(params),
+    placeholderData: keepPreviousData,
   })
 }
