@@ -62,13 +62,14 @@
   color: var(--color-text-strong);
 }
 
+@media (max-width: 600px) {
+  .nav {
+    gap: var(--space-3);
+  }
+}
+
 .main {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: var(--space-4) var(--space-3);
-  @media (max-width: 600px) {
-    .nav {
-      gap: var(--space-3);
-    }
-  }
 }
