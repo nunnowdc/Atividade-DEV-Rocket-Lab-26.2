@@ -42,6 +42,22 @@ A API mínima ficará disponível em `http://localhost:8000`; use
 `http://localhost:8000/docs` para a documentação automática. O endpoint
 `GET /health` permite conferir se a aplicação iniciou corretamente.
 
+## Carga dos dados (CSVs)
+
+Os CSVs não são versionados (ver `.gitignore`). Coloque-os em `backend/data/`
+— qualquer estrutura de subpastas funciona, o script procura pelo nome do arquivo.
+
+Com as migrações aplicadas, execute dentro de `backend/`:
+
+```bash
+python -m app.db.seed
+```
+
+A carga leva de 1 a 2 minutos, roda em uma única transação e pode ser repetida
+sem duplicar dados. Os CSVs são importados como fornecidos; o script apenas
+converte cada coluna para o tipo esperado pelo banco (datas, números e campos
+vazios como `NULL`).
+
 ## Banco de dados e migrações
 
 O modelo usa um esquema estrela para o catálogo de filmes:
