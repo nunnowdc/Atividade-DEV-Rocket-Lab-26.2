@@ -1,0 +1,10 @@
+.badge {
+  font-weight: 700;
+  color: var(--color-green);
+  white-space: nowrap;
+}
+
+.empty {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
