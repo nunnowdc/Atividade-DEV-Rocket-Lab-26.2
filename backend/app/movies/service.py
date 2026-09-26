@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -11,10 +11,12 @@ from app.movies.models import (
     DimGenre,
     DimMovie,
     DimPerson,
+    DimReview,
     FactMoviePerformance,
+    MovieReview,
     PersonType,
 )
-from app.movies.schemas import MovieIn
+from app.movies.schemas import MovieIn, ReviewIn
 
 
 class InvalidGenresError(Exception):
@@ -89,6 +91,19 @@ async def delete_movie(db: AsyncSession, movie: DimMovie) -> None:
 
     await db.delete(movie)
     await db.commit()
+
+
+async def create_review(db: AsyncSession, movie_id: str, data: ReviewIn) -> MovieReview:
+    """Registra uma avaliação e atualiza a média guardada do filme."""
+
+    review = MovieReview(
+        sk_movie_id=movie_id, nome=data.nome, nota=data.nota, comentario=data.comentario
+    )
+    db.add(review)
+    await _add_to_review_summary(db, movie_id, data.nota)
+    await db.commit()
+    await db.refresh(review)  # carrega o created_at gerado pelo banco
+    return review
 
 
 # --- Funções internas ---
@@ -168,3 +183,25 @@ async def _get_or_create_companies(db: AsyncSession, names: list[str]) -> list[D
     )
     existing = {company.nome_produtora.lower(): company for company in await db.scalars(query)}
     return [existing.get(name.lower()) or DimCompany(nome_produtora=name) for name in names]
+
+
+async def _add_to_review_summary(db: AsyncSession, movie_id: str, nota: float) -> None:
+    """Soma uma nota à média guardada em ``dim_reviews``, sem recalcular do zero.
+
+    nova média = (média atual × quantidade atual + nota) / (quantidade atual + 1)
+    """
+
+    qtd = DimReview.qtd_avaliacoes_usuarios
+    media = func.coalesce(DimReview.nota_media_usuarios, 0)  # média vazia conta como 0
+
+    result = await db.execute(
+        update(DimReview)
+        .where(DimReview.sk_movie_id == movie_id)
+        .values(
+            nota_media_usuarios=func.round((media * qtd + nota) / (qtd + 1), 2),
+            qtd_avaliacoes_usuarios=qtd + 1,
+        )
+    )
+    if result.rowcount == 0:
+        # O filme ainda não tinha resumo: esta é a primeira avaliação.
+        db.add(DimReview(sk_movie_id=movie_id, qtd_avaliacoes_usuarios=1, nota_media_usuarios=nota))

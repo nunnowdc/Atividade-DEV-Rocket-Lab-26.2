@@ -9,7 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.movies import service
 from app.movies.models import DimMovie
-from app.movies.schemas import GenreOut, MovieDetail, MovieIn, MoviePage, MovieSummary
+from app.movies.schemas import (
+    GenreOut,
+    MovieDetail,
+    MovieIn,
+    MoviePage,
+    MovieSummary,
+    ReviewIn,
+    ReviewOut,
+)
 
 router = APIRouter()
 genres_router = APIRouter()
@@ -83,6 +91,14 @@ async def delete_movie(movie: MovieFromPath, db: DbSession) -> Response:
 
     await service.delete_movie(db, movie)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{movie_id}/reviews", response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
+async def create_review(data: ReviewIn, movie: MovieFromPath, db: DbSession) -> ReviewOut:
+    """Adiciona uma avaliação (nota de 0 a 10 e comentário) a um filme."""
+
+    review = await service.create_review(db, movie.sk_movie_id, data)
+    return ReviewOut.model_validate(review)
 
 
 @genres_router.get("", response_model=list[GenreOut])
