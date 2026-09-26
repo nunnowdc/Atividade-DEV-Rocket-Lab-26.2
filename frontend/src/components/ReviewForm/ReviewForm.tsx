@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useCreateReview } from '../../hooks/useCreateReview'
+import StarRatingInput from '../StarRatingInput/StarRatingInput'
 import styles from './ReviewForm.module.css'
 
 interface ReviewFormProps {
@@ -8,7 +9,7 @@ interface ReviewFormProps {
 
 function ReviewForm({ movieId }: ReviewFormProps) {
   const [nome, setNome] = useState('')
-  const [nota, setNota] = useState(5)
+  const [nota, setNota] = useState(0)
   const [comentario, setComentario] = useState('')
   const createReview = useCreateReview(movieId)
 
@@ -20,14 +21,15 @@ function ReviewForm({ movieId }: ReviewFormProps) {
         // Limpa o formulário só se a API aceitou a avaliação.
         onSuccess: () => {
           setNome('')
-          setNota(5)
+          setNota(0)
           setComentario('')
         },
       },
     )
   }
 
-  const canSubmit = nome.trim() !== '' && comentario.trim() !== '' && !createReview.isPending
+  const canSubmit =
+    nome.trim() !== '' && nota > 0 && comentario.trim() !== '' && !createReview.isPending
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
@@ -43,20 +45,10 @@ function ReviewForm({ movieId }: ReviewFormProps) {
         />
       </label>
 
-      <label className={styles.field}>
-        <span>
-          Nota: <strong className={styles.score}>{nota.toFixed(1)}</strong> / 10
-        </span>
-        <input
-          type="range"
-          min={0}
-          max={10}
-          step={0.5}
-          value={nota}
-          onChange={(event) => setNota(Number(event.target.value))}
-          className={styles.range}
-        />
-      </label>
+      <div className={styles.field}>
+        <span>Nota</span>
+        <StarRatingInput value={nota} onChange={setNota} />
+      </div>
 
       <label className={styles.field}>
         <span>Resenha</span>

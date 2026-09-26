@@ -20,7 +20,9 @@ function ReviewList({ reviews }: ReviewListProps) {
         <li key={review.sk_movie_review_id} className={styles.review}>
           <div className={styles.header}>
             <span className={styles.author}>{review.nome}</span>
-            <span className={styles.rating}>★ {review.nota.toFixed(1)}</span>
+            <span className={styles.rating}>
+              ★ {Number.isInteger(review.nota) ? review.nota : review.nota.toFixed(1)}
+            </span>
             <span className={styles.date}>{formatDateTime(review.created_at)}</span>
           </div>
           <p className={styles.comment}>{review.comentario}</p>
