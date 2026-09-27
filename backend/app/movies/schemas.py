@@ -76,7 +76,9 @@ class MovieDetail(MovieSummary):
     performance: PerformanceOut | None
     reviews: list[ReviewOut]
 
+
 MovieSort = Literal["popularidade", "titulo", "recentes", "avaliacao"]
+
 
 class MoviePage(BaseModel):
     """Uma página do catálogo."""
