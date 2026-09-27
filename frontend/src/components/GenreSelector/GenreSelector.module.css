@@ -1,0 +1,38 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background-color 0.1s,
+    color 0.1s;
+}
+
+.tag:hover {
+  color: var(--color-text-strong);
+}
+
+.selected {
+  border-color: var(--color-green);
+  background: var(--color-green);
+  color: var(--color-bg);
+  font-weight: 700;
+}
+
+.selected:hover {
+  color: var(--color-bg);
+}
+
+.status {
+  margin: 0;
+  font-size: 0.9rem;
+}

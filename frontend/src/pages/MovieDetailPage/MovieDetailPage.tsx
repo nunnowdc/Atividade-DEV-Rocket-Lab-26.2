@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router'
+import DeleteMovieButton from '../../components/DeleteMovieButton/DeleteMovieButton'
 import GenreTags from '../../components/GenreTags/GenreTags'
 import RatingBadge from '../../components/RatingBadge/RatingBadge'
 import ReviewForm from '../../components/ReviewForm/ReviewForm'
@@ -114,9 +115,16 @@ function MovieDetailPage() {
             )}
           </dl>
 
-          <Link to={`/movies/${movie.sk_movie_id}/edit`} className={styles.editLink}>
-            Editar filme
-          </Link>
+          <div className={styles.actions}>
+            <Link to={`/movies/${movie.sk_movie_id}/edit`} className={styles.editButton}>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z" />
+                <path d="M13.5 6.5l4 4" />
+              </svg>
+              Editar
+            </Link>
+            <DeleteMovieButton movieId={movie.sk_movie_id} titulo={movie.titulo} />
+          </div>
         </div>
 
         <aside className={styles.ratingBox}>
