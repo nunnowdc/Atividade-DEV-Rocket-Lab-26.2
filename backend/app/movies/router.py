@@ -95,7 +95,7 @@ async def delete_movie(movie: MovieFromPath, db: DbSession) -> Response:
 
 @router.post("/{movie_id}/reviews", response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
 async def create_review(data: ReviewIn, movie: MovieFromPath, db: DbSession) -> ReviewOut:
-    """Adiciona uma avaliação (nota de 0 a 10 e comentário) a um filme."""
+    """Adiciona uma avaliação (nota inteira de 1 a 10 e comentário) a um filme."""
 
     review = await service.create_review(db, movie.sk_movie_id, data)
     return ReviewOut.model_validate(review)
