@@ -3,6 +3,7 @@ import MovieForm from '../../components/MovieForm/MovieForm'
 import { EMPTY_MOVIE_FORM, movieToFormValues } from '../../components/MovieForm/movieFormValues'
 import { useMovie } from '../../hooks/useMovie'
 import { useCreateMovie, useUpdateMovie } from '../../hooks/useMovieMutations'
+import { useToast } from '../../hooks/useToast'
 import styles from './MovieFormPage.module.css'
 
 // A mesma rota serve para cadastrar (/movies/new) e editar (/movies/:id/edit).
@@ -13,6 +14,7 @@ function MovieFormPage() {
 
 function CreateMovie() {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const createMovie = useCreateMovie()
 
   return (
@@ -26,7 +28,10 @@ function CreateMovie() {
         submitError={createMovie.error?.message ?? null}
         onSubmit={(data) =>
           createMovie.mutate(data, {
-            onSuccess: (movie) => navigate(`/movies/${movie.sk_movie_id}`),
+            onSuccess: (movie) => {
+              showToast(`"${movie.titulo}" foi cadastrado!`)
+              navigate(`/movies/${movie.sk_movie_id}`)
+            },
           })
         }
       />
@@ -36,6 +41,7 @@ function CreateMovie() {
 
 function EditMovie({ movieId }: { movieId: string }) {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const { data: movie, isPending, isError, error } = useMovie(movieId)
   const updateMovie = useUpdateMovie(movieId)
 
@@ -62,7 +68,10 @@ function EditMovie({ movieId }: { movieId: string }) {
         submitError={updateMovie.error?.message ?? null}
         onSubmit={(data) =>
           updateMovie.mutate(data, {
-            onSuccess: () => navigate(`/movies/${movieId}`),
+            onSuccess: () => {
+              showToast('Alterações salvas!')
+              navigate(`/movies/${movieId}`)
+            },
           })
         }
       />
