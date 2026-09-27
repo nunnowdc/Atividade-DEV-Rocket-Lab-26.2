@@ -11,8 +11,12 @@
     background-color 0.15s;
 }
 
-.bookmark:hover {
-  background: rgb(20 24 28 / 95%);
+/* Só em aparelhos com mouse: no celular o "hover" ficaria preso depois do toque. */
+@media (hover: hover) {
+  .bookmark:hover {
+    background: rgb(20 24 28 / 95%);
+    color: var(--color-yellow);
+  }
 }
 
 .bookmark svg {
