@@ -2,9 +2,9 @@
 
 from uuid import uuid4
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import Select, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
 from app.movies.models import (
     DimCompany,
@@ -15,16 +15,29 @@ from app.movies.models import (
     FactMoviePerformance,
     MovieReview,
     PersonType,
+    bridge_movie_genre,
 )
-from app.movies.schemas import MovieIn, ReviewIn
+from app.movies.schemas import MovieIn, MovieSort, ReviewIn
 
 
 class InvalidGenresError(Exception):
     """Um ou mais ids de gênero enviados não existem."""
 
 
+# "Votos imaginários" da média ponderada: quanto maior, mais avaliações um
+# filme precisa ter para se destacar da média geral.
+BAYES_MIN_VOTES = 3
+
+
 async def list_movies(
-    db: AsyncSession, *, page: int, size: int, search: str | None = None
+    db: AsyncSession,
+    *,
+    page: int,
+    size: int,
+    search: str | None = None,
+    genre_id: str | None = None,
+    year: int | None = None,
+    sort: MovieSort = "popularidade",
 ) -> tuple[list[DimMovie], int]:
     """Devolve os filmes da página pedida e o total de filmes encontrados."""
 
@@ -32,19 +45,67 @@ async def list_movies(
     if search:
         filters.append(DimMovie.titulo.icontains(search, autoescape=True))
 
+    if genre_id:
+        # Filmes cujo id está na lista de filmes daquele gênero. O IN deixa o
+        # banco partir da tabela de ligação (mais rápido que testar filme a filme).
+        movies_of_genre = select(bridge_movie_genre.c.sk_movie_id).where(
+            bridge_movie_genre.c.sk_genre_id == genre_id
+        )
+        filters.append(DimMovie.sk_movie_id.in_(movies_of_genre))
+    if year:
+        filters.append(DimMovie.ano_lancamento == year)
+
+
     total = await db.scalar(select(func.count()).select_from(DimMovie).where(*filters))
 
     query = (
-        select(DimMovie)
-        .outerjoin(DimMovie.performance)
+        _apply_sort(select(DimMovie), sort)
         .where(*filters)
         .options(selectinload(DimMovie.genres), selectinload(DimMovie.reviews_summary))
-        .order_by(FactMoviePerformance.popularidade.desc().nulls_last(), DimMovie.titulo)
         .offset((page - 1) * size)
         .limit(size)
     )
     movies = (await db.scalars(query)).all()
     return list(movies), total or 0
+
+
+def _apply_sort(query: Select, sort: MovieSort) -> Select:
+    """Acrescenta à consulta os JOINs e o ORDER BY de cada ordenação."""
+
+    if sort == "titulo":
+        # Ignora aspas no início ("Blessed" ordena como Blessed, não antes do A).
+        return query.order_by(func.lower(func.ltrim(DimMovie.titulo, "\"'")), DimMovie.titulo)
+
+    if sort == "recentes":
+        return query.order_by(
+            DimMovie.data_lancamento.desc().nulls_last(),
+            DimMovie.ano_lancamento.desc().nulls_last(),
+            DimMovie.titulo,
+        )
+
+    if sort == "avaliacao":
+        # Média ponderada (bayesiana): (qtd × média + m × média geral) / (qtd + m).
+        # Filmes com poucas avaliações ficam "puxados" para a média geral.
+        qtd = DimReview.qtd_avaliacoes_usuarios
+        media = DimReview.nota_media_usuarios
+        all_reviews = aliased(DimReview)  # tabela à parte para a média geral
+        global_mean = (
+            select(
+                func.sum(all_reviews.nota_media_usuarios * all_reviews.qtd_avaliacoes_usuarios)
+                / func.sum(all_reviews.qtd_avaliacoes_usuarios)
+            )
+            .where(all_reviews.nota_media_usuarios.is_not(None))
+            .scalar_subquery()
+        )
+        score = (qtd * media + BAYES_MIN_VOTES * global_mean) / (qtd + BAYES_MIN_VOTES)
+        return query.outerjoin(DimMovie.reviews_summary).order_by(
+            score.desc().nulls_last(), qtd.desc().nulls_last(), DimMovie.titulo
+        )
+
+    # Padrão: mais populares primeiro.
+    return query.outerjoin(DimMovie.performance).order_by(
+        FactMoviePerformance.popularidade.desc().nulls_last(), DimMovie.titulo
+    )
 
 
 async def get_movie(db: AsyncSession, movie_id: str) -> DimMovie | None:
@@ -67,6 +128,18 @@ async def get_movie(db: AsyncSession, movie_id: str) -> DimMovie | None:
 
 async def list_genres(db: AsyncSession) -> list[DimGenre]:
     return list(await db.scalars(select(DimGenre).order_by(DimGenre.nome_genero)))
+
+
+async def list_years(db: AsyncSession) -> list[int]:
+    """Anos de lançamento que existem no catálogo, do mais recente ao mais antigo."""
+
+    query = (
+        select(DimMovie.ano_lancamento)
+        .where(DimMovie.ano_lancamento.is_not(None))
+        .distinct()
+        .order_by(DimMovie.ano_lancamento.desc())
+    )
+    return list(await db.scalars(query))
 
 
 async def create_movie(db: AsyncSession, data: MovieIn) -> DimMovie:

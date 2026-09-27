@@ -64,6 +64,8 @@ export interface MovieDetail extends MovieSummary {
   reviews: Review[]
 }
 
+export type MovieSort = 'popularidade' | 'titulo' | 'recentes' | 'avaliacao'
+
 export interface MoviePage {
   items: MovieSummary[]
   total: number

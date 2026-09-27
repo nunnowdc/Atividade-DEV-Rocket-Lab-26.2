@@ -26,10 +26,12 @@ async function errorMessage(response: Response): Promise<string> {
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
-  })
+  const headers = new Headers(init?.headers)
+  // Só declara JSON quando há corpo (POST/PUT). Num GET, esse cabeçalho faria o
+  // navegador mandar antes uma requisição extra de verificação (preflight CORS).
+  if (init?.body) headers.set('Content-Type', 'application/json')
+
+  const response = await fetch(`${API_URL}${path}`, { ...init, headers })
 
   if (!response.ok) {
     throw new ApiError(response.status, await errorMessage(response))

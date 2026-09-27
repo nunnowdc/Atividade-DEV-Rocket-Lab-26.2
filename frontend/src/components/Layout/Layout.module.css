@@ -44,6 +44,14 @@
   margin-right: var(--space-2);
 }
 
+/* A busca ocupa todo o espaço livre entre o logo e o menu. */
+.search {
+  flex: 1;
+  min-width: 0;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
 .nav {
   display: flex;
   gap: var(--space-4);
@@ -65,6 +73,15 @@
 @media (max-width: 600px) {
   .nav {
     gap: var(--space-3);
+  }
+}
+
+/* Telas estreitas: a busca desce para uma linha própria, com a largura toda. */
+@media (max-width: 760px) {
+  .search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
   }
 }
 
