@@ -19,6 +19,11 @@
   letter-spacing: 0.05em;
 }
 
+/* Mesmo espaço que o texto "95.645 FILMES" ocupa, para nada pular. */
+.countSkeleton {
+  margin: 2px 0 calc(var(--space-4) + 7px);
+}
+
 .grid {
   display: grid;
   /* Quantas colunas couberem, cada uma com pelo menos 150px. */

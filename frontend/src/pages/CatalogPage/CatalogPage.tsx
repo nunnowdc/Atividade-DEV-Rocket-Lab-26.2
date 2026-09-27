@@ -1,7 +1,9 @@
 import { useSearchParams } from 'react-router'
 import MovieCard from '../../components/MovieCard/MovieCard'
+import MovieCardSkeleton from '../../components/MovieCardSkeleton/MovieCardSkeleton'
 import Pagination from '../../components/Pagination/Pagination'
 import SearchBar from '../../components/SearchBar/SearchBar'
+import Skeleton from '../../components/Skeleton/Skeleton'
 import { useMovies } from '../../hooks/useMovies'
 import styles from './CatalogPage.module.css'
 
@@ -35,7 +37,16 @@ function CatalogPage() {
         <SearchBar key={q} defaultValue={q} onSearch={handleSearch} />
       </div>
 
-      {isPending && <p className={styles.status}>Carregando filmes...</p>}
+      {isPending && (
+        <>
+          <Skeleton width="110px" height="0.85rem" className={styles.countSkeleton} />
+          <div className={styles.grid} aria-busy="true" aria-label="Carregando filmes">
+            {Array.from({ length: 20 }, (_, index) => (
+              <MovieCardSkeleton key={index} />
+            ))}
+          </div>
+        </>
+      )}
 
       {isError && (
         <p className={styles.error}>Não foi possível carregar os filmes: {error.message}</p>
