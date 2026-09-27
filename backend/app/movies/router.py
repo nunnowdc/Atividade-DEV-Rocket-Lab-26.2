@@ -14,6 +14,7 @@ from app.movies.schemas import (
     MovieDetail,
     MovieIn,
     MoviePage,
+    MovieSort,
     MovieSummary,
     ReviewIn,
     ReviewOut,
@@ -43,10 +44,11 @@ async def list_movies(
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 20,
     q: Annotated[str | None, Query(max_length=200, description="Busca pelo título")] = None,
+    sort: Annotated[MovieSort, Query(description="Ordem do catálogo")] = "popularidade",
 ) -> MoviePage:
-    """Catálogo paginado, com busca opcional pelo título."""
+    """Catálogo paginado, com busca opcional pelo título e escolha da ordem."""
 
-    movies, total = await service.list_movies(db, page=page, size=size, search=q)
+    movies, total = await service.list_movies(db, page=page, size=size, search=q, sort=sort)
     return MoviePage(
         items=[MovieSummary.model_validate(movie) for movie in movies],
         total=total,
