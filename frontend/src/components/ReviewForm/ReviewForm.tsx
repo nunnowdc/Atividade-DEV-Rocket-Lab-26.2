@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useCreateReview } from '../../hooks/useCreateReview'
+import { useToast } from '../../hooks/useToast'
 import StarRatingInput from '../StarRatingInput/StarRatingInput'
 import styles from './ReviewForm.module.css'
 
@@ -12,6 +13,7 @@ function ReviewForm({ movieId }: ReviewFormProps) {
   const [nota, setNota] = useState(0)
   const [comentario, setComentario] = useState('')
   const createReview = useCreateReview(movieId)
+  const { showToast } = useToast()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -20,6 +22,7 @@ function ReviewForm({ movieId }: ReviewFormProps) {
       {
         // Limpa o formulário só se a API aceitou a avaliação.
         onSuccess: () => {
+          showToast('Avaliação publicada!')
           setNome('')
           setNota(0)
           setComentario('')
@@ -64,7 +67,6 @@ function ReviewForm({ movieId }: ReviewFormProps) {
       {createReview.isError && (
         <p className={styles.error}>Não foi possível salvar: {createReview.error.message}</p>
       )}
-      {createReview.isSuccess && <p className={styles.success}>Avaliação publicada!</p>}
 
       <button type="submit" className={styles.button} disabled={!canSubmit}>
         {createReview.isPending ? 'Enviando...' : 'Publicar avaliação'}
