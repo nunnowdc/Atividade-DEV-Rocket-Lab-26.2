@@ -15,6 +15,7 @@ from app.movies.models import (
     FactMoviePerformance,
     MovieReview,
     PersonType,
+    bridge_movie_genre,
 )
 from app.movies.schemas import MovieIn, MovieSort, ReviewIn
 
@@ -34,6 +35,8 @@ async def list_movies(
     page: int,
     size: int,
     search: str | None = None,
+    genre_id: str | None = None,
+    year: int | None = None,
     sort: MovieSort = "popularidade",
 ) -> tuple[list[DimMovie], int]:
     """Devolve os filmes da página pedida e o total de filmes encontrados."""
@@ -41,6 +44,17 @@ async def list_movies(
     filters = []
     if search:
         filters.append(DimMovie.titulo.icontains(search, autoescape=True))
+
+    if genre_id:
+        # Filmes cujo id está na lista de filmes daquele gênero. O IN deixa o
+        # banco partir da tabela de ligação (mais rápido que testar filme a filme).
+        movies_of_genre = select(bridge_movie_genre.c.sk_movie_id).where(
+            bridge_movie_genre.c.sk_genre_id == genre_id
+        )
+        filters.append(DimMovie.sk_movie_id.in_(movies_of_genre))
+    if year:
+        filters.append(DimMovie.ano_lancamento == year)
+
 
     total = await db.scalar(select(func.count()).select_from(DimMovie).where(*filters))
 
@@ -114,6 +128,18 @@ async def get_movie(db: AsyncSession, movie_id: str) -> DimMovie | None:
 
 async def list_genres(db: AsyncSession) -> list[DimGenre]:
     return list(await db.scalars(select(DimGenre).order_by(DimGenre.nome_genero)))
+
+
+async def list_years(db: AsyncSession) -> list[int]:
+    """Anos de lançamento que existem no catálogo, do mais recente ao mais antigo."""
+
+    query = (
+        select(DimMovie.ano_lancamento)
+        .where(DimMovie.ano_lancamento.is_not(None))
+        .distinct()
+        .order_by(DimMovie.ano_lancamento.desc())
+    )
+    return list(await db.scalars(query))
 
 
 async def create_movie(db: AsyncSession, data: MovieIn) -> DimMovie:
