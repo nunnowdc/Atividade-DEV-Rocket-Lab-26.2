@@ -55,7 +55,6 @@ async def list_movies(
     if year:
         filters.append(DimMovie.ano_lancamento == year)
 
-
     total = await db.scalar(select(func.count()).select_from(DimMovie).where(*filters))
 
     query = (
@@ -291,7 +290,7 @@ async def _add_to_review_summary(db: AsyncSession, movie_id: str, nota: float) -
         update(DimReview)
         .where(DimReview.sk_movie_id == movie_id)
         .values(
-            nota_media_usuarios=func.round((media * qtd + nota) / (qtd + 1), 2),
+            nota_media_usuarios=(media * qtd + nota) / (qtd + 1),
             qtd_avaliacoes_usuarios=qtd + 1,
         )
     )
