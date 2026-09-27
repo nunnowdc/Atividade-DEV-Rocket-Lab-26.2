@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useDeleteMovie } from '../../hooks/useMovieMutations'
 import { useToast } from '../../hooks/useToast'
+import { useWatchlist } from '../../hooks/useWatchlist'
 import styles from './DeleteMovieButton.module.css'
 
 interface DeleteMovieButtonProps {
@@ -14,11 +15,13 @@ function DeleteMovieButton({ movieId, titulo }: DeleteMovieButtonProps) {
   const [confirming, setConfirming] = useState(false)
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const { remove: removeFromWatchlist } = useWatchlist()
   const deleteMovie = useDeleteMovie(movieId)
 
   function handleDelete() {
     deleteMovie.mutate(undefined, {
       onSuccess: () => {
+        removeFromWatchlist(movieId) // filme excluído não pode ficar na watchlist
         showToast(`"${titulo}" foi excluído.`)
         navigate('/', { replace: true })
       },
