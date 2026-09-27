@@ -1,0 +1,216 @@
+.status {
+  padding: var(--space-5) 0;
+  text-align: center;
+}
+
+/* Imagem de fundo no topo, que desaparece em direção ao fundo da página. */
+.backdrop {
+  height: 320px;
+  margin: calc(var(--space-4) * -1) calc(var(--space-3) * -1) calc(var(--space-5) * -2);
+  background-size: cover;
+  background-position: center top;
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+  opacity: 0.6;
+}
+
+.top {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px 1fr 180px;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.poster {
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 50%);
+}
+
+.poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.poster span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.year {
+  margin-left: var(--space-3);
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--color-text);
+}
+
+.directors {
+  margin: 0;
+}
+
+.directors strong {
+  color: var(--color-text-strong);
+}
+
+.synopsis {
+  margin: 0;
+  max-width: 65ch;
+  font-size: 1.05rem;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+
+.facts dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--color-text-strong);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2) var(--space-3);
+}
+
+.editButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: border-color 0.15s;
+}
+
+.editButton:hover {
+  border-color: var(--color-blue);
+  color: var(--color-text-strong);
+}
+
+.editButton svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ratingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.ratingLabel,
+.ratingCount {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.ratingValue {
+  font-size: 2rem;
+}
+
+.credits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.credits h2,
+.reviews h2 {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+
+.credits p {
+  margin: 0;
+}
+
+.reviews {
+  margin-top: var(--space-5);
+}
+
+.reviewsGrid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+/* Tablet: nota vai para baixo do texto. Celular: tudo em uma coluna. */
+@media (max-width: 900px) {
+  .top {
+    grid-template-columns: 180px 1fr;
+  }
+
+  .ratingBox {
+    grid-column: 1 / -1;
+  }
+
+  .reviewsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+
+  .poster {
+    width: 60%;
+    margin: 0 auto;
+  }
+
+  .title {
+    font-size: 1.7rem;
+  }
+}

@@ -1,0 +1,39 @@
+/* Estrelas em cima e texto embaixo, sempre na mesma posição: a altura do
+   componente não muda quando o mouse passa, então a página não "pula". */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stars {
+  display: flex;
+}
+
+.star {
+  padding: 0 1px;
+  border: none;
+  background: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.star:focus-visible {
+  outline: 2px solid var(--color-blue);
+  border-radius: 2px;
+}
+
+.filled {
+  color: var(--color-green);
+  opacity: 1;
+}
+
+.value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
