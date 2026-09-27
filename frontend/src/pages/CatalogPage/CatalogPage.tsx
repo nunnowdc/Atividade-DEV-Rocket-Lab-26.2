@@ -5,6 +5,7 @@ import Pagination from '../../components/Pagination/Pagination'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import Skeleton from '../../components/Skeleton/Skeleton'
 import { useMovies } from '../../hooks/useMovies'
+import { PAGE_SIZE } from '../../services/movies'
 import styles from './CatalogPage.module.css'
 
 function CatalogPage() {
@@ -41,7 +42,7 @@ function CatalogPage() {
         <>
           <Skeleton width="110px" height="0.85rem" className={styles.countSkeleton} />
           <div className={styles.grid} aria-busy="true" aria-label="Carregando filmes">
-            {Array.from({ length: 20 }, (_, index) => (
+            {Array.from({ length: PAGE_SIZE }, (_, index) => (
               <MovieCardSkeleton key={index} />
             ))}
           </div>
