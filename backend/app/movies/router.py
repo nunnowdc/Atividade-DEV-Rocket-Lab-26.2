@@ -108,6 +108,15 @@ async def create_review(data: ReviewIn, movie: MovieFromPath, db: DbSession) -> 
     return ReviewOut.model_validate(review)
 
 
+@router.delete("/{movie_id}/reviews/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_review(review_id: str, movie: MovieFromPath, db: DbSession) -> Response:
+    """Exclui uma avaliação e desfaz a nota dela na média do filme."""
+
+    if not await service.delete_review(db, movie.sk_movie_id, review_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Avaliação não encontrada")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @genres_router.get("", response_model=list[GenreOut])
 async def list_genres(db: DbSession) -> list[GenreOut]:
     """Gêneros disponíveis, para a caixa de tags do formulário."""
