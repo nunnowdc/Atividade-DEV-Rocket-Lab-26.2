@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import App from './App'
+import ToastProvider from './components/ToastProvider/ToastProvider'
 import './styles/global.css'
 
 // Guarda em cache as respostas da API. Por 1 minuto os dados são considerados
@@ -20,7 +21,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,
