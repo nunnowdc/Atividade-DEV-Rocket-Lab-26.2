@@ -5,6 +5,7 @@ import type {
   MovieDetail,
   MovieInput,
   MoviePage,
+  MovieSort,
   Review,
   ReviewInput,
 } from '../types/movie'
@@ -18,11 +19,13 @@ export interface ListMoviesParams {
   page: number
   size?: number
   q?: string
+  sort?: MovieSort
 }
 
-export function listMovies({ page, size = PAGE_SIZE, q }: ListMoviesParams) {
+export function listMovies({ page, size = PAGE_SIZE, q, sort }: ListMoviesParams) {
   const params = new URLSearchParams({ page: String(page), size: String(size) })
   if (q) params.set('q', q)
+  if (sort) params.set('sort', sort)
   return request<MoviePage>(`/movies?${params}`)
 }
 
