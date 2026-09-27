@@ -4,6 +4,7 @@ import GenreTags from '../../components/GenreTags/GenreTags'
 import RatingBadge from '../../components/RatingBadge/RatingBadge'
 import ReviewForm from '../../components/ReviewForm/ReviewForm'
 import ReviewList from '../../components/ReviewList/ReviewList'
+import Skeleton from '../../components/Skeleton/Skeleton'
 import { useMovie } from '../../hooks/useMovie'
 import { ApiError } from '../../services/api'
 import type { Person, PersonType } from '../../types/movie'
@@ -14,12 +15,29 @@ function namesOf(people: Person[], tipo: PersonType) {
   return people.filter((person) => person.tipo_pessoa === tipo).map((person) => person.nome_pessoa)
 }
 
+// Esqueleto da página enquanto o filme carrega: mesma grade da página real.
+function MovieDetailSkeleton() {
+  return (
+    <div className={styles.top} aria-busy="true" aria-label="Carregando filme">
+      <Skeleton className={styles.posterSkeleton} />
+      <div className={styles.info}>
+        <Skeleton width="60%" height="2.2rem" />
+        <Skeleton width="35%" />
+        <Skeleton width="100%" />
+        <Skeleton width="95%" />
+        <Skeleton width="70%" />
+      </div>
+      <Skeleton height="120px" />
+    </div>
+  )
+}
+
 function MovieDetailPage() {
   const { movieId = '' } = useParams()
   const { data: movie, isPending, isError, error } = useMovie(movieId)
 
   if (isPending) {
-    return <p className={styles.status}>Carregando filme...</p>
+    return <MovieDetailSkeleton />
   }
 
   if (isError) {

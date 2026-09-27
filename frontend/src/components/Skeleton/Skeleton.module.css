@@ -1,0 +1,32 @@
+.skeleton {
+  display: block;
+  height: 1em;
+  border-radius: var(--radius);
+  /* Degradê com uma faixa mais clara no meio; a animação move essa faixa
+     da direita para a esquerda, dando o efeito de "brilho passando". */
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-surface-hover) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Quem pede ao sistema menos animações não vê o brilho (acessibilidade). */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
