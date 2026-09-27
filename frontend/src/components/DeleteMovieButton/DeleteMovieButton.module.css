@@ -1,0 +1,63 @@
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-left: 4px solid var(--color-danger);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.confirm p {
+  margin: 0;
+}
+
+.confirm strong {
+  color: var(--color-text-strong);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.danger {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-danger);
+  color: var(--color-text-strong);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.error {
+  color: var(--color-danger);
+}
