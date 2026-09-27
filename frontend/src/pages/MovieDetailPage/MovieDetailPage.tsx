@@ -182,7 +182,7 @@ function MovieDetailPage() {
       <section className={styles.reviews}>
         <h2>Avaliações</h2>
         <div className={styles.reviewsGrid}>
-          <ReviewList reviews={movie.reviews} />
+          <ReviewList movieId={movie.sk_movie_id} reviews={movie.reviews} />
           <ReviewForm movieId={movie.sk_movie_id} />
         </div>
       </section>

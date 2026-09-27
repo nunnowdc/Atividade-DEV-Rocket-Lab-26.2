@@ -1,12 +1,14 @@
 import type { Review } from '../../types/movie'
+import DeleteReviewButton from '../DeleteReviewButton/DeleteReviewButton'
 import { formatDateTime } from '../../utils/format'
 import styles from './ReviewList.module.css'
 
 interface ReviewListProps {
+  movieId: string
   reviews: Review[]
 }
 
-function ReviewList({ reviews }: ReviewListProps) {
+function ReviewList({ movieId, reviews }: ReviewListProps) {
   if (reviews.length === 0) {
     return <p className={styles.empty}>Nenhuma avaliação ainda. Seja o primeiro!</p>
   }
@@ -24,6 +26,7 @@ function ReviewList({ reviews }: ReviewListProps) {
               ★ {Number.isInteger(review.nota) ? review.nota : review.nota.toFixed(1)}
             </span>
             <span className={styles.date}>{formatDateTime(review.created_at)}</span>
+            <DeleteReviewButton movieId={movieId} reviewId={review.sk_movie_review_id} />
           </div>
           <p className={styles.comment}>{review.comentario}</p>
         </li>

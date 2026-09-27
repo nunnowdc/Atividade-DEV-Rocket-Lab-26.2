@@ -1,0 +1,58 @@
+.trash {
+  display: inline-flex;
+  padding: 2px;
+  border: none;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.trash:hover {
+  color: var(--color-danger);
+}
+
+.trash svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8rem;
+  color: var(--color-text-strong);
+}
+
+.yes,
+.no {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.yes {
+  border: none;
+  background: var(--color-danger);
+  color: var(--color-text-strong);
+  font-weight: 700;
+}
+
+.yes:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no {
+  border: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-text);
+}
