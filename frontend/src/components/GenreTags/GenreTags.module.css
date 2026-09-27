@@ -1,0 +1,16 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+  font-size: 0.8rem;
+}
