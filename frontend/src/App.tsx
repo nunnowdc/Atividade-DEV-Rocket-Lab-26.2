@@ -4,6 +4,7 @@ import CatalogPage from './pages/CatalogPage/CatalogPage'
 import MovieDetailPage from './pages/MovieDetailPage/MovieDetailPage'
 import MovieFormPage from './pages/MovieFormPage/MovieFormPage'
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
+import WatchlistPage from './pages/WatchlistPage/WatchlistPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="movies/new" element={<MovieFormPage />} />
         <Route path="movies/:movieId" element={<MovieDetailPage />} />
         <Route path="movies/:movieId/edit" element={<MovieFormPage />} />
+        <Route path="watchlist" element={<WatchlistPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
