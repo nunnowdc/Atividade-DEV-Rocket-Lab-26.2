@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useDeleteMovie } from '../../hooks/useMovieMutations'
+import { useToast } from '../../hooks/useToast'
 import styles from './DeleteMovieButton.module.css'
 
 interface DeleteMovieButtonProps {
@@ -12,11 +13,15 @@ interface DeleteMovieButtonProps {
 function DeleteMovieButton({ movieId, titulo }: DeleteMovieButtonProps) {
   const [confirming, setConfirming] = useState(false)
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const deleteMovie = useDeleteMovie(movieId)
 
   function handleDelete() {
     deleteMovie.mutate(undefined, {
-      onSuccess: () => navigate('/', { replace: true }),
+      onSuccess: () => {
+        showToast(`"${titulo}" foi excluído.`)
+        navigate('/', { replace: true })
+      },
     })
   }
 
