@@ -22,10 +22,15 @@ function SearchBar() {
     clearTimeout(timer.current)
     if (term === lastSearched.current) return
     lastSearched.current = term
-    const query = term ? `?${new URLSearchParams({ q: term })}` : ''
+    // No catálogo, mantém os outros parâmetros (como a ordem escolhida).
+    const params = new URLSearchParams(onCatalog ? searchParams : undefined)
+    if (term) params.set('q', term)
+    else params.delete('q')
+    params.delete('page') // busca nova começa da página 1
+    const query = params.toString()
     // No catálogo, substitui a entrada do histórico (o "voltar" não passa
     // por "m", "ma", "mat"...). Vindo de outra página, cria uma nova.
-    navigate(`/${query}`, { replace: onCatalog })
+    navigate(query ? `/?${query}` : '/', { replace: onCatalog })
   }
 
   // Debounce: cada tecla cancela o cronômetro anterior e começa outro.
