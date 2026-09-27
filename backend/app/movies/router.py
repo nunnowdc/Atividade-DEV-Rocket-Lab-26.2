@@ -22,6 +22,7 @@ from app.movies.schemas import (
 
 router = APIRouter()
 genres_router = APIRouter()
+years_router = APIRouter()
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
@@ -44,11 +45,15 @@ async def list_movies(
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 20,
     q: Annotated[str | None, Query(max_length=200, description="Busca pelo título")] = None,
+    genre: Annotated[str | None, Query(description="Id do gênero (sk_genre_id)")] = None,
+    year: Annotated[int | None, Query(ge=1888, le=2100, description="Ano de lançamento")] = None,
     sort: Annotated[MovieSort, Query(description="Ordem do catálogo")] = "popularidade",
 ) -> MoviePage:
-    """Catálogo paginado, com busca opcional pelo título e escolha da ordem."""
+    """Catálogo paginado, com busca pelo título, filtros por gênero e ano e escolha da ordem."""
 
-    movies, total = await service.list_movies(db, page=page, size=size, search=q, sort=sort)
+    movies, total = await service.list_movies(
+        db, page=page, size=size, search=q, genre_id=genre, year=year, sort=sort
+    )
     return MoviePage(
         items=[MovieSummary.model_validate(movie) for movie in movies],
         total=total,
@@ -108,3 +113,10 @@ async def list_genres(db: DbSession) -> list[GenreOut]:
     """Gêneros disponíveis, para a caixa de tags do formulário."""
 
     return [GenreOut.model_validate(genre) for genre in await service.list_genres(db)]
+
+
+@years_router.get("", response_model=list[int])
+async def list_years(db: DbSession) -> list[int]:
+    """Anos de lançamento existentes, para o filtro do catálogo."""
+
+    return await service.list_years(db)

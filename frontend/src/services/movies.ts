@@ -19,12 +19,16 @@ export interface ListMoviesParams {
   page: number
   size?: number
   q?: string
+  genre?: string
+  year?: number
   sort?: MovieSort
 }
 
-export function listMovies({ page, size = PAGE_SIZE, q, sort }: ListMoviesParams) {
+export function listMovies({ page, size = PAGE_SIZE, q, genre, year, sort }: ListMoviesParams) {
   const params = new URLSearchParams({ page: String(page), size: String(size) })
   if (q) params.set('q', q)
+  if (genre) params.set('genre', genre)
+  if (year) params.set('year', String(year))
   if (sort) params.set('sort', sort)
   return request<MoviePage>(`/movies?${params}`)
 }
@@ -57,4 +61,8 @@ export function createReview(movieId: string, data: ReviewInput) {
 
 export function listGenres() {
   return request<Genre[]>('/genres')
+}
+
+export function listYears() {
+  return request<number[]>('/years')
 }
