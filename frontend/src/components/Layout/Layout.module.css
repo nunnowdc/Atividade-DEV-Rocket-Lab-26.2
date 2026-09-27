@@ -65,6 +65,15 @@
   color: var(--color-text);
 }
 
+.badge {
+  margin-left: var(--space-1);
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--color-green);
+  color: var(--color-bg);
+  font-size: 0.7rem;
+}
+
 .nav a:hover,
 .nav a.active {
   color: var(--color-text-strong);

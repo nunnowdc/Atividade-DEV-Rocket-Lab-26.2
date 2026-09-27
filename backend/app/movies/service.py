@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from sqlalchemy import Select, func, or_, select, update
+from sqlalchemy import Select, case, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
@@ -54,7 +54,6 @@ async def list_movies(
         filters.append(DimMovie.sk_movie_id.in_(movies_of_genre))
     if year:
         filters.append(DimMovie.ano_lancamento == year)
-
 
     total = await db.scalar(select(func.count()).select_from(DimMovie).where(*filters))
 
@@ -179,6 +178,26 @@ async def create_review(db: AsyncSession, movie_id: str, data: ReviewIn) -> Movi
     return review
 
 
+async def delete_review(db: AsyncSession, movie_id: str, review_id: str) -> bool:
+    """Exclui uma avaliação do filme e desfaz a nota dela na média guardada.
+
+    Devolve False se a avaliação não existir (ou for de outro filme).
+    """
+
+    review = await db.scalar(
+        select(MovieReview).where(
+            MovieReview.sk_movie_review_id == review_id, MovieReview.sk_movie_id == movie_id
+        )
+    )
+    if review is None:
+        return False
+
+    await _remove_from_review_summary(db, movie_id, review.nota)
+    await db.delete(review)
+    await db.commit()
+    return True
+
+
 # --- Funções internas ---
 
 
@@ -271,10 +290,35 @@ async def _add_to_review_summary(db: AsyncSession, movie_id: str, nota: float) -
         update(DimReview)
         .where(DimReview.sk_movie_id == movie_id)
         .values(
-            nota_media_usuarios=func.round((media * qtd + nota) / (qtd + 1), 2),
+            nota_media_usuarios=(media * qtd + nota) / (qtd + 1),
             qtd_avaliacoes_usuarios=qtd + 1,
         )
     )
     if result.rowcount == 0:
         # O filme ainda não tinha resumo: esta é a primeira avaliação.
         db.add(DimReview(sk_movie_id=movie_id, qtd_avaliacoes_usuarios=1, nota_media_usuarios=nota))
+
+
+async def _remove_from_review_summary(db: AsyncSession, movie_id: str, nota: float) -> None:
+    """Tira uma nota da média guardada em ``dim_reviews`` (inverso de somar).
+
+    nova média = (média atual × quantidade atual − nota) / (quantidade atual − 1)
+
+    Como os resumos do CSV nem sempre batem com as avaliações, a conta pode sair
+    de 0 a 10; nesse caso o resultado é limitado ao intervalo. Com a quantidade
+    chegando a 0, a média fica vazia. Filme sem resumo: nada a desfazer.
+    """
+
+    qtd = DimReview.qtd_avaliacoes_usuarios
+    media = func.coalesce(DimReview.nota_media_usuarios, 0)
+    new_average = (media * qtd - nota) / (qtd - 1)
+    clamped = case((new_average > 10, 10), (new_average < 0, 0), else_=new_average)
+
+    await db.execute(
+        update(DimReview)
+        .where(DimReview.sk_movie_id == movie_id, qtd > 0)
+        .values(
+            nota_media_usuarios=case((qtd <= 1, None), else_=clamped),
+            qtd_avaliacoes_usuarios=qtd - 1,
+        )
+    )

@@ -59,6 +59,10 @@ export function createReview(movieId: string, data: ReviewInput) {
   })
 }
 
+export function deleteReview(movieId: string, reviewId: string) {
+  return request<void>(`/movies/${movieId}/reviews/${reviewId}`, { method: 'DELETE' })
+}
+
 export function listGenres() {
   return request<Genre[]>('/genres')
 }

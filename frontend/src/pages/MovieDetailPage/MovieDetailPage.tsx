@@ -5,6 +5,7 @@ import RatingBadge from '../../components/RatingBadge/RatingBadge'
 import ReviewForm from '../../components/ReviewForm/ReviewForm'
 import ReviewList from '../../components/ReviewList/ReviewList'
 import Skeleton from '../../components/Skeleton/Skeleton'
+import WatchlistButton from '../../components/WatchlistButton/WatchlistButton'
 import { useMovie } from '../../hooks/useMovie'
 import { ApiError } from '../../services/api'
 import type { Person, PersonType } from '../../types/movie'
@@ -134,6 +135,7 @@ function MovieDetailPage() {
           </dl>
 
           <div className={styles.actions}>
+            <WatchlistButton movie={movie} />
             <Link to={`/movies/${movie.sk_movie_id}/edit`} className={styles.editButton}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z" />
@@ -182,7 +184,7 @@ function MovieDetailPage() {
       <section className={styles.reviews}>
         <h2>Avaliações</h2>
         <div className={styles.reviewsGrid}>
-          <ReviewList reviews={movie.reviews} />
+          <ReviewList movieId={movie.sk_movie_id} reviews={movie.reviews} />
           <ReviewForm movieId={movie.sk_movie_id} />
         </div>
       </section>
