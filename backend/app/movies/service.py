@@ -2,9 +2,9 @@
 
 from uuid import uuid4
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import Select, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
 from app.movies.models import (
     DimCompany,
@@ -16,15 +16,25 @@ from app.movies.models import (
     MovieReview,
     PersonType,
 )
-from app.movies.schemas import MovieIn, ReviewIn
+from app.movies.schemas import MovieIn, MovieSort, ReviewIn
 
 
 class InvalidGenresError(Exception):
     """Um ou mais ids de gênero enviados não existem."""
 
 
+# "Votos imaginários" da média ponderada: quanto maior, mais avaliações um
+# filme precisa ter para se destacar da média geral.
+BAYES_MIN_VOTES = 3
+
+
 async def list_movies(
-    db: AsyncSession, *, page: int, size: int, search: str | None = None
+    db: AsyncSession,
+    *,
+    page: int,
+    size: int,
+    search: str | None = None,
+    sort: MovieSort = "popularidade",
 ) -> tuple[list[DimMovie], int]:
     """Devolve os filmes da página pedida e o total de filmes encontrados."""
 
@@ -35,16 +45,53 @@ async def list_movies(
     total = await db.scalar(select(func.count()).select_from(DimMovie).where(*filters))
 
     query = (
-        select(DimMovie)
-        .outerjoin(DimMovie.performance)
+        _apply_sort(select(DimMovie), sort)
         .where(*filters)
         .options(selectinload(DimMovie.genres), selectinload(DimMovie.reviews_summary))
-        .order_by(FactMoviePerformance.popularidade.desc().nulls_last(), DimMovie.titulo)
         .offset((page - 1) * size)
         .limit(size)
     )
     movies = (await db.scalars(query)).all()
     return list(movies), total or 0
+
+
+def _apply_sort(query: Select, sort: MovieSort) -> Select:
+    """Acrescenta à consulta os JOINs e o ORDER BY de cada ordenação."""
+
+    if sort == "titulo":
+        # Ignora aspas no início ("Blessed" ordena como Blessed, não antes do A).
+        return query.order_by(func.lower(func.ltrim(DimMovie.titulo, "\"'")), DimMovie.titulo)
+
+    if sort == "recentes":
+        return query.order_by(
+            DimMovie.data_lancamento.desc().nulls_last(),
+            DimMovie.ano_lancamento.desc().nulls_last(),
+            DimMovie.titulo,
+        )
+
+    if sort == "avaliacao":
+        # Média ponderada (bayesiana): (qtd × média + m × média geral) / (qtd + m).
+        # Filmes com poucas avaliações ficam "puxados" para a média geral.
+        qtd = DimReview.qtd_avaliacoes_usuarios
+        media = DimReview.nota_media_usuarios
+        all_reviews = aliased(DimReview)  # tabela à parte para a média geral
+        global_mean = (
+            select(
+                func.sum(all_reviews.nota_media_usuarios * all_reviews.qtd_avaliacoes_usuarios)
+                / func.sum(all_reviews.qtd_avaliacoes_usuarios)
+            )
+            .where(all_reviews.nota_media_usuarios.is_not(None))
+            .scalar_subquery()
+        )
+        score = (qtd * media + BAYES_MIN_VOTES * global_mean) / (qtd + BAYES_MIN_VOTES)
+        return query.outerjoin(DimMovie.reviews_summary).order_by(
+            score.desc().nulls_last(), qtd.desc().nulls_last(), DimMovie.titulo
+        )
+
+    # Padrão: mais populares primeiro.
+    return query.outerjoin(DimMovie.performance).order_by(
+        FactMoviePerformance.popularidade.desc().nulls_last(), DimMovie.titulo
+    )
 
 
 async def get_movie(db: AsyncSession, movie_id: str) -> DimMovie | None:
