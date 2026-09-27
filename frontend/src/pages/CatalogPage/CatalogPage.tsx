@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router'
 import MovieCard from '../../components/MovieCard/MovieCard'
 import MovieCardSkeleton from '../../components/MovieCardSkeleton/MovieCardSkeleton'
 import Pagination from '../../components/Pagination/Pagination'
-import SearchBar from '../../components/SearchBar/SearchBar'
 import Skeleton from '../../components/Skeleton/Skeleton'
 import { useMovies } from '../../hooks/useMovies'
 import { PAGE_SIZE } from '../../services/movies'
@@ -20,10 +19,6 @@ function CatalogPage() {
     q: q || undefined,
   })
 
-  function handleSearch(term: string) {
-    setSearchParams(term ? { q: term } : {})
-  }
-
   function handlePageChange(newPage: number) {
     const next = new URLSearchParams(searchParams)
     next.set('page', String(newPage))
@@ -35,7 +30,6 @@ function CatalogPage() {
     <section>
       <div className={styles.header}>
         <h1>{q ? `Resultados para "${q}"` : 'Catálogo'}</h1>
-        <SearchBar key={q} defaultValue={q} onSearch={handleSearch} />
       </div>
 
       {isPending && (

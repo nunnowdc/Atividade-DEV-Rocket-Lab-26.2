@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router'
+import SearchBar from '../SearchBar/SearchBar'
 import styles from './Layout.module.css'
 
 function Layout() {
@@ -12,6 +13,9 @@ function Layout() {
             <span className={styles.dotBlue} />
             CineRocket
           </Link>
+          <div className={styles.search}>
+            <SearchBar />
+          </div>
           <nav className={styles.nav}>
             <NavLink to="/" end className={({ isActive }) => (isActive ? styles.active : '')}>
               Catálogo
